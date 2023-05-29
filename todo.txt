@@ -1,0 +1,6 @@
+find libraries
+screen capture
+chessboard from screen
+
+
+note about PIL: Pillow and PIL cannot co-exist in the same environment. Before installing Pillow, please uninstall PIL
