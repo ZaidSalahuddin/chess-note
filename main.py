@@ -4,6 +4,17 @@ from PIL import ImageGrab
 
 bbox = (0,0,1920,1200)
 
+#function for distance formula
+def distance(x1,y1,x2,y2):
+    x_diff = x2-x1
+    y_diff = y2-y1
+    x_diff_sq = np.abs(x_diff^2)
+    print("xdiff",x_diff_sq)
+    y_diff_sq = np.abs(y_diff^2)
+    print("ydiff",y_diff_sq)
+    dist = np.sqrt(x_diff_sq+y_diff_sq)
+    return dist
+
 # function to screen shot
 def screenshot():
     image = np.array(ImageGrab.grab(bbox=bbox))
@@ -15,63 +26,66 @@ def get_board(screen):
     gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
 
     # blurs image
-    blur = cv2.medianBlur(gray, 5)
+    blur = cv2.medianBlur(gray, 7)
+    blur = cv2.medianBlur(blur, 5)
     #show the blur 
     cv2.imshow("blur",blur)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
     #thresholds image
-    ret, thresh = cv2.threshold(blur, 220, 255, cv2.THRESH_BINARY)
+    ret, thresh = cv2.threshold(blur, 180, 255, cv2.THRESH_BINARY)
     #show the thresh 
     cv2.imshow("thresh",thresh)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-    #downscales image
-    # scale_percent = 60 # percent of original size
-    # width = int(screen.shape[1] * scale_percent / 100)
-    # height = int(screen.shape[0] * scale_percent / 100)
-    # dim = (width, height)
-    # resized = cv2.resize(thresh, dim, interpolation=cv2.INTER_AREA)
+    
+    #inverted image
+    inv = cv2.bitwise_not(thresh)
+    #inverted imageb
+    cv2.imshow("inverted",inv)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     #finds chessboard corners
     #code just to find best corner dimensions
-    numbers = [5,6,7,8,9,10,11]
-    for i in numbers:
-        for x in numbers:
-            #sets the dimension of the chessboardcorners function
-            corner_dim = (i,x)
-            ret, corners = cv2.findChessboardCorners(thresh, corner_dim,None) 
-            print(corners)
-            print('ret: ', ret)
+    #sets the dimension of the chessboardcorners function
+    corner_dim = (7,7)
+    ret, corners = cv2.findChessboardCorners(inv, corner_dim,None) 
 
-            #the mask for the image
-            mask = np.zeros_like(screen)
+    #the mask for the image
+    mask = np.zeros_like(screen)
+    
+    if ret == True:
+        #draw the chessboard area on the mask
+        mask = cv2.drawChessboardCorners(mask, corner_dim, corners, ret)
+        
+        #extend the mask to the 8x8 sides
+        #use corners 0 and 8 for top right square
+        #use index -1 and -9 for bottom left
+        #print("corners shape",corners)
+        corners_2d = corners
+        corners_2d = np.reshape(corners_2d,(49,2))
 
-            #draw the chessboard area on the mask
-            mask = cv2.drawChessboardCorners(mask, corner_dim, corners, ret)
-            #drawing a rectagle over it igb
-            #mask = cv2.rectangle(mask, corners[0],corners[1])
-            
-            #show the mask 
-            cv2.imshow(f"mask {i} by {x}",mask)
+        side_length_top_left = distance(int(corners_2d[0,0]), int(corners_2d[0,1]), int(corners_2d[8,0]), int(corners_2d[8,1]))
+        print("side legt top", side_length_top_left)
 
-            #rescale the mask
-            # new_dim = (int(screen.shape[1]), int(screen.shape[0]))
-            # resized_mask = cv2.resize(mask, new_dim, interpolation=cv2.INTER_AREA)
-            resized_mask = mask
+        side_length_bottom_right = distance(int(corners_2d[-1,0]), int(corners_2d[-1,1]), int(corners_2d[-9,0]), int(corners_2d[-9,1]))
+        print("side legnth bottom", side_length_bottom_right)
 
-            #appply mask
-            board = cv2.bitwise_or(screen,resized_mask)
+        #drawing a rectagle over it igb
+        #show the mask 
+        cv2.imshow(f"mask",mask)
 
-            #show the board 
-            cv2.imshow("board",board)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+        #appply mask
+        board = cv2.bitwise_or(screen,mask)
 
+        #show the board 
+        cv2.imshow("board",board)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-    return board
+        return board
 
 print('working')
 screen = screenshot()
