@@ -4,7 +4,7 @@ from PIL import ImageGrab
 
 bbox = (0,0,1920,1200)
 
-#function for distance formula
+#function for distance formula just becoz
 def distance(x1,y1,x2,y2):
     x_diff = x2-x1
     y_diff = y2-y1
@@ -26,24 +26,12 @@ def get_board(screen):
     # blurs image
     blur = cv2.medianBlur(gray, 7)
     blur = cv2.medianBlur(blur, 5)
-    #show the blur 
-    cv2.imshow("blur",blur)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
     #thresholds image
     ret, thresh = cv2.threshold(blur, 180, 255, cv2.THRESH_BINARY)
-    #show the thresh 
-    cv2.imshow("thresh",thresh)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
     
     #inverted image
     inv = cv2.bitwise_not(thresh)
-    #inverted imageb
-    cv2.imshow("inverted",inv)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
     #finds chessboard corners
     #code just to find best corner dimensions
@@ -67,18 +55,14 @@ def get_board(screen):
         corners_2d = np.reshape(corners_2d,(49,2))
 
         #gets the distance from the corners of the corner squares and finds a point 1 diagonal away
-        side_length_top = distance(int(corners_2d[0,0]), int(corners_2d[0,1]), int(corners_2d[8,0]), int(corners_2d[8,1]))
-        side_length_bottom = distance(int(corners_2d[-1,0]), int(corners_2d[-1,1]), int(corners_2d[-9,0]), int(corners_2d[-9,1]))
+        side_length_top = distance(int(corners_2d[0,0]), int(corners_2d[0,1]), int(corners_2d[7,0]), int(corners_2d[7,1]))
+        side_length_bottom = distance(int(corners_2d[-1,0]), int(corners_2d[-1,1]), int(corners_2d[-8,0]), int(corners_2d[-8,1]))
 
         top_point = (int(corners_2d[0,0]-side_length_top), int(corners_2d[0,1]-side_length_top))
         bottom_point = (int(corners_2d[-1,0]+side_length_bottom), int(corners_2d[-1,1]+side_length_bottom))
 
         #drawing a rectagle mask with the previous point
-        # rect = np.zeros(gray.shape, dtype=np.uint8)
-        # mask = np.reshape(rect, rect.shape + (1,))
-        # mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
         cv2.rectangle(mask,top_point,bottom_point,255,-1)
-
 
         print("mnask shape: ", mask.shape)
 
@@ -100,8 +84,3 @@ screen = screenshot()
 print('screen shotted')
 board = get_board(screen)
 print('board processed')
-
-cv2.imshow("screenshot",screen)
-cv2.imshow("board",board)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
