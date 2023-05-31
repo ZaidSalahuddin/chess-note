@@ -1,0 +1,2 @@
+stuff needed to install (debug edittion):
+pip install opencv-contrib-python
