@@ -8,8 +8,8 @@ bbox = (0,0,1920,1200)
 def distance(x1,y1,x2,y2):
     x_diff = x2-x1
     y_diff = y2-y1
-    x_diff_sq = np.abs(x_diff^2)
-    y_diff_sq = np.abs(y_diff^2)
+    x_diff_sq = x_diff**2
+    y_diff_sq = y_diff**2
     dist = np.sqrt(x_diff_sq+y_diff_sq)
     return dist
 
@@ -56,7 +56,7 @@ def get_board(screen):
     
     if ret == True:
         #draw the chessboard area on the mask
-        #mask = cv2.drawChessboardCorners(mask, corner_dim, corners, ret)
+        mask = cv2.drawChessboardCorners(mask, corner_dim, corners, ret)
         
         #extend the mask to the 8x8 sides
         #use corners 0 and 8 for top right square
@@ -71,14 +71,13 @@ def get_board(screen):
         side_length_bottom = distance(int(corners_2d[-1,0]), int(corners_2d[-1,1]), int(corners_2d[-9,0]), int(corners_2d[-9,1]))
 
         top_point = (int(corners_2d[0,0]-side_length_top), int(corners_2d[0,1]-side_length_top))
-        bottom_point = (int(corners_2d[-1,0]-side_length_bottom), int(corners_2d[-1,1]-side_length_bottom))
+        bottom_point = (int(corners_2d[-1,0]+side_length_bottom), int(corners_2d[-1,1]+side_length_bottom))
 
         #drawing a rectagle mask with the previous point
-        print(gray.shape)
-        rect = np.zeros(gray.shape, dtype=np.uint8)
-        mask = np.reshape(rect, rect.shape + (1,))
-        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
-        mask = cv2.rectangle(mask,top_point,bottom_point,255)
+        # rect = np.zeros(gray.shape, dtype=np.uint8)
+        # mask = np.reshape(rect, rect.shape + (1,))
+        # mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+        cv2.rectangle(mask,top_point,bottom_point,255,-1)
 
 
         print("mnask shape: ", mask.shape)
@@ -87,7 +86,7 @@ def get_board(screen):
         cv2.imshow(f"mask",mask)
 
         #appply mask
-        board = cv2.bitwise_or(screen,mask)
+        board = cv2.bitwise_and(screen,mask)
 
         #show the board 
         cv2.imshow("board",board)
