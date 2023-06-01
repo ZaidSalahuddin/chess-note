@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 from PIL import ImageGrab
+from PIL import Image
+from board_to_fen.predict import get_fen_from_image
 
 bbox = (0,0,1920,1200)
 
@@ -62,7 +64,7 @@ def get_board(screen):
         bottom_point = (int(corners_2d[-1,0]+side_length_bottom), int(corners_2d[-1,1]+side_length_bottom))
 
         #drawing a rectagle mask with the previous point
-        cv2.rectangle(mask,top_point,bottom_point,255,-1)
+        cv2.rectangle(mask,top_point,bottom_point,(255,255,255),-1)
 
         print("mnask shape: ", mask.shape)
 
@@ -71,6 +73,10 @@ def get_board(screen):
 
         #appply mask
         board = cv2.bitwise_and(screen,mask)
+        board = board[top_point[1]:bottom_point[1], top_point[0]:bottom_point[0]]
+
+        # grayscale the board to maybe fix the fen issues
+        # board = cv2.cvtColor(board, cv2.COLOR_BGR2GRAY)
 
         #show the board 
         cv2.imshow("board",board)
@@ -79,8 +85,19 @@ def get_board(screen):
 
         return board
 
+#analyze board position
+def analyze_board(board):
+    print("board: ",type(board))
+    #board = Image.fromarray(np.uint8(board))
+    print("board shape: ",board.shape)
+    #board.save(img=board)
+    print(get_fen_from_image(board))
+    #current error: AttributeError: module 'PIL.Image' has no attribute 'resize'
+
 print('working')
 screen = screenshot()
 print('screen shotted')
 board = get_board(screen)
 print('board processed')
+fen = analyze_board(board)
+print('board analized')
