@@ -1,2 +1,12 @@
 stuff needed to install (debug edittion):
 pip install opencv-contrib-python
+
+#current error: AttributeError: 'str' object has no attribute 'decode'
+tryna fix by:
+pip3 uninstall keras
+pip3 uninstall tensorflow
+pip3 install --upgrade pip3
+pip3 install tensorflow
+pip3 install keras
+
+this solved the issue but now im getting: AttributeError: 'int' object has no attribute 'resize'
